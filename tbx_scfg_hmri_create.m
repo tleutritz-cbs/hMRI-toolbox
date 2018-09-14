@@ -379,6 +379,63 @@ sensitivity.values  = {xNULL x0 x1 x3};
 sensitivity.val     = {x0};
 
 % ---------------------------------------------------------------------
+% mUSoutP GM/WM/CSF segmentations + extras will be output along with maps
+% ---------------------------------------------------------------------
+mUSoutP          = cfg_entry;
+mUSoutP.tag      = 'raw_sens_T1';
+mUSoutP.name     = 'RF sensitivity maps for T1w images';
+mUSoutP.help     = {['GM/WM/CSF segmentations + inverse deformation field' ...
+                      ' and GM/WM segementations warped to MNI will be output to Results/Supplementary.']};
+mUSoutP.strtype = 's';
+mUSoutP.num     = [1 Inf];
+mUSoutP.val     = {'mUSoutP'};
+% ---------------------------------------------------------------------
+% mUSout GM/WM/CSF segmentations will be output along with maps
+% ---------------------------------------------------------------------
+mUSout         = cfg_entry;
+mUSout.tag     = 'mUSout';
+mUSout.name    = 'US maps output';
+mUSout.help    = {'GM/WM/CSF segmentations will be output to Results/Supplementary.'};
+mUSout.strtype = 's';
+mUSout.num     = [1 Inf];
+mUSout.val     = {'mUSout'};
+% ---------------------------------------------------------------------
+% mUS standard US
+% ---------------------------------------------------------------------
+mUS         = cfg_entry;
+mUS.tag     = 'mUS';
+mUS.name    = 'Unified Segmentation';
+mUS.help    = {['Masking during map processing based on Unified Segmentation (US) approach.']};
+mUS.strtype = 's';
+mUS.num     = [1 Inf];
+mUS.val     = {'mUS'};
+% ---------------------------------------------------------------------
+% mINPUT masks for GM/WM/Wholebrain
+% ---------------------------------------------------------------------
+mINPUT          = cfg_files;
+mINPUT.tag      = 'mINPUT';
+mINPUT.name     = 'External masks';
+mINPUT.help     = {['Input masks for whole brain and WM for map processing.', ...
+    'Select masks for the whole brain (or volume) and white matter (WM) ' ...
+    ' to be processed respectively, in that order.']};
+mINPUT.filter   = 'image';
+mINPUT.ufilter  = '.*';
+mINPUT.num      = [2 2];
+% ---------------------------------------------------------------------
+% masks Masks choice
+% ---------------------------------------------------------------------
+masks         = cfg_choice;
+masks.tag     = 'masks';
+masks.name    = 'Masking';
+masks.help    = {'Specify how map processing handles brain (tissue) masks. '
+    'You can select either:'
+    '- Standard: unified segmentation (US) will be applied (common usage),'
+    '- Output Masks: GM/WM/CSF segmentations will be output to Results/Supplementary,'
+    '- Output Masks + more: as above + MNI warped masks and inverse deformation field,'
+    '- Input Masks: input of masks for whole brain + WM for map processing.'};
+masks.values  = {mUS mUSout mUSoutP mINPUT};
+masks.val     = {mUS};
+% ---------------------------------------------------------------------
 % indir Input directory as output directory
 % ---------------------------------------------------------------------
 indir         = cfg_entry;
@@ -417,7 +474,7 @@ subj            = cfg_branch;
 subj.tag        = 'subj';
 subj.name       = 'Subject';
 subj.help       = {'Specify a subject for maps calculation.'};
-subj.val        = {output sensitivity b1_type raws popup};
+subj.val        = {output sensitivity b1_type raws popup masks};
 
 % ---------------------------------------------------------------------
 % data Data

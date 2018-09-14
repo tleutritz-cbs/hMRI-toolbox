@@ -839,26 +839,39 @@ end
 % if no MT map available. Therefore, we must at least have R1 available,
 % i.e. both PDw and T1w inputs...
 if (mpm_params.QA.enable||(PDproc.calibr)) && (PDwidx && T1widx)
-    if ~isempty(fMT); 
-        Vsave = spm_vol(fMT);
-    else % ~isempty(fR1); 
-        Vsave = spm_vol(fR1); 
+    if ~isfield(mpm_params.proc.masks,'mINPUT')
+        if ~isempty(fMT)
+            Vsave = spm_vol(fMT);
+        else % ~isempty(fR1);
+            Vsave = spm_vol(fR1);
+        end
+        MTtemp = spm_read_vols(Vsave);
+        % The 5 outer voxels in all directions are nulled in order to remove
+        % artefactual effects from the MT map on segmentation:
+        MTtemp(1:5,:,:)=0; MTtemp(end-5:end,:,:)=0;
+        MTtemp(:,1:5,:)=0; MTtemp(:,end-5:end,:)=0;
+        MTtemp(:,:,1:5)=0; MTtemp(:,:,end-5:end)=0;
+        Vsave.fname = spm_file(Vsave.fname,'suffix','_outer_suppressed');
+        spm_write_vol(Vsave,MTtemp);
+        
+        % use unified segmentation with uniform defaults across the toobox:
+        job_brainmask = hmri_get_defaults('segment');
+        if isfield(mpm_params.proc.masks,'mUSoutP')
+            job_brainmask.tissue(1).warped = [1 0];
+            job_brainmask.tissue(2).warped = [1 0];
+            job_brainmask.warp.write = [1 0];
+        end
+        job_brainmask.channel.vols = {Vsave.fname};
+        job_brainmask.channel.write = [0 0]; % no need to write BiasField nor BiasCorrected image
+        output_list = spm_preproc_run(job_brainmask);
+        fTPM = char(cat(1,output_list.tiss.c));
+        if isfield(mpm_params.proc.masks,'mUSoutP')
+            fwc = char(cat(1,output_list.tiss.wc));
+            finvDef = char(output_list.invdef);
+        end
+    else
+        fTPM = char(cat(1,mpm_params.proc.masks.mINPUT));
     end
-    MTtemp = spm_read_vols(Vsave);
-    % The 5 outer voxels in all directions are nulled in order to remove
-    % artefactual effects from the MT map on segmentation: 
-    MTtemp(1:5,:,:)=0; MTtemp(end-5:end,:,:)=0;
-    MTtemp(:,1:5,:)=0; MTtemp(:,end-5:end,:)=0;
-    MTtemp(:,:,1:5)=0; MTtemp(:,:,end-5:end)=0;
-    Vsave.fname = spm_file(Vsave.fname,'suffix','_outer_suppressed');
-    spm_write_vol(Vsave,MTtemp);
-    
-    % use unified segmentation with uniform defaults across the toobox:
-    job_brainmask = hmri_get_defaults('segment');
-    job_brainmask.channel.vols = {Vsave.fname};
-    job_brainmask.channel.write = [0 0]; % no need to write BiasField nor BiasCorrected image
-    output_list = spm_preproc_run(job_brainmask);
-    fTPM = char(cat(1,output_list.tiss.c));
 end
 
 % for quality assessment - the above segmentation must have run
@@ -1011,6 +1024,24 @@ else
     PMTw = '';
 end
 
+if isfield(mpm_params.proc.masks,'mUSout')
+    % finvDef / fwc
+    PMTw_c1 = fullfile(supplpath, spm_file(fTPM(1,:),'filename'));
+    copyfile(fTPM(1,:),PMTw_c1);
+    PMTw_c2 = fullfile(supplpath, spm_file(fTPM(2,:),'filename'));
+    copyfile(fTPM(2,:),PMTw_c2);
+    PMTw_c3 = fullfile(supplpath, spm_file(fTPM(3,:),'filename'));
+    copyfile(fTPM(3,:),PMTw_c3);
+    if isfield(mpm_params.proc.masks,'mUSoutP')
+        PMTw_wc1 = fullfile(supplpath, spm_file(fwc(1,:),'filename'));
+        copyfile(fTPM(1,:),PMTw_wc1);
+        PMTw_wc2 = fullfile(supplpath, spm_file(fwc(2,:),'filename'));
+        copyfile(fTPM(2,:),PMTw_wc2);
+        PMTw_invDef = fullfile(supplpath, spm_file(finvDef(3,:),'filename'));
+        copyfile(fTPM(3,:),PMTw_invDef);
+    end
+end
+
 % save processing params (mpm_params)
 spm_jsonwrite(fullfile(supplpath,'hMRI_map_creation_mpm_params.json'),mpm_params,struct('indent','\t'));
 
@@ -1075,10 +1106,15 @@ threshA = mpm_params.proc.threshall.A;
 calcpath = mpm_params.calcpath;
 
 TPMs = spm_read_vols(spm_vol(fTPM));
+if ~isfield(mpm_params.proc.masks,'mINPUT')
 WBmask = zeros(size(squeeze(TPMs(:,:,:,1))));
 WBmask(sum(cat(4,TPMs(:,:,:,1:2),TPMs(:,:,:,end)),4)>=PDproc.WBMaskTh) = 1;
 WMmask=zeros(size(squeeze(TPMs(:,:,:,1))));
 WMmask(squeeze(TPMs(:,:,:,2))>=PDproc.WMMaskTh) = 1;
+else
+    WBmask = fTPM(1,:);
+    WMmask = fTPM(2,:);
+end
 
 % Save masked A map for bias-field correction later
 V_maskedA = spm_vol(fA);
@@ -1364,6 +1400,9 @@ mpm_params.proc.ISC = hmri_get_defaults(['imperfectSpoilCorr.',prot_tag]);
 
 % RF sensitivity bias correction
 mpm_params.proc.RFsenscorr = jobsubj.sensitivity;
+
+% masking options (usage of US or external masks + output of US results)
+mpm_params.proc.masks = jobsubj.masks;
 
 % other processing parameters from defaults
 % load threshold to save qMRI maps
