@@ -331,15 +331,15 @@ xNULL.strtype = 's';
 xNULL.num     = [1 Inf];
 xNULL.val     = {'-'};
 % ---------------------------------------------------------------------
-% xPreScan RF sensitivity bias correction applied with PreScan normalize
+% xNorm RF sensitivity bias correction done with Prescan Normalize
 % ---------------------------------------------------------------------
-xPreScan         = cfg_entry;
-xPreScan.tag     = 'PreScan';
-xPreScan.name    = 'PreScan';
-xPreScan.help    = {'RF sensitivity bias correction was applied at the scanner using Prescan Normalize. Make sure to select the correct input files, i.e. not the ones with "ND".'};
-xPreScan.strtype = 's';
-xPreScan.num     = [1 Inf];
-xPreScan.val     = {'PreScan'};
+xNorm         = cfg_entry;
+xNorm.tag     = 'Normalized';
+xNorm.name    = 'Normalized';
+xNorm.help    = {'RF sensitivity bias correction was applied at the scanner using Prescan Normalize. Make sure to select the correct input files, i.e. not the ones with "ND".'};
+xNorm.strtype = 's';
+xNorm.num     = [1 Inf];
+xNorm.val     = {'Normalized'};
 % ---------------------------------------------------------------------
 % x0 No RF sensitivity
 % ---------------------------------------------------------------------
@@ -385,7 +385,7 @@ sensitivity.help    = {'Specify the type of RF sensitivity bias correction to be
     '- Unified Segmentation: based on US, no RF sensitivity map required,'
     '- Single: based on a single set of RF sensitivity maps for all contrasts,'
     '- Per contrast: based on one set of RF sensitivity maps acquired for each contrast.'};
-sensitivity.values  = {xNULL xPreScan x0 x1 x3};
+sensitivity.values  = {xNULL xNorm x0 x1 x3};
 sensitivity.val     = {x0};
 
 % ---------------------------------------------------------------------
