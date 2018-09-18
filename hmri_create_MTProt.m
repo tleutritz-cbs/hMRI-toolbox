@@ -1107,23 +1107,18 @@ calcpath = mpm_params.calcpath;
 
 TPMs = spm_read_vols(spm_vol(fTPM));
 if ~isfield(mpm_params.proc.masks,'mINPUT')
-WBmask = zeros(size(squeeze(TPMs(:,:,:,1))));
-WBmask(sum(cat(4,TPMs(:,:,:,1:2),TPMs(:,:,:,end)),4)>=PDproc.WBMaskTh) = 1;
-WMmask=zeros(size(squeeze(TPMs(:,:,:,1))));
-WMmask(squeeze(TPMs(:,:,:,2))>=PDproc.WMMaskTh) = 1;
+    WBmask = zeros(size(squeeze(TPMs(:,:,:,1))));
+    WBmask(sum(cat(4,TPMs(:,:,:,1:2),TPMs(:,:,:,end)),4)>=PDproc.WBMaskTh) = 1;
+    WMmask=zeros(size(squeeze(TPMs(:,:,:,1))));
+    WMmask(squeeze(TPMs(:,:,:,2))>=PDproc.WMMaskTh) = 1;
 else
     % read in data
     WBmask = spm_read_vols(spm_vol(fTPM(1,:)));
     WMmask = spm_read_vols(spm_vol(fTPM(2,:)));
     
-    % null 5 outer voxels in all directions as for MT:
-    WBmask(1:5,:,:)=0; WBmask(end-5:end,:,:)=0;
-    WBmask(:,1:5,:)=0; WBmask(:,end-5:end,:)=0;
-    WBmask(:,:,1:5)=0; WBmask(:,:,end-5:end)=0;
-    
-    WMmask(1:5,:,:)=0; WMmask(end-5:end,:,:)=0;
-    WMmask(:,1:5,:)=0; WMmask(:,end-5:end,:)=0;
-    WMmask(:,:,1:5)=0; WMmask(:,:,end-5:end)=0;
+    % binarize WM mask
+    WMmask(WMmask<PDproc.WMMaskTh) = 0;
+    WMmask(WMmask>=PDproc.WMMaskTh) = 1;
 end
 
 % Save masked A map for bias-field correction later
