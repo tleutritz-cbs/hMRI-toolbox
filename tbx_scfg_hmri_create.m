@@ -392,7 +392,7 @@ sensitivity.val     = {x0};
 % mUSoutP GM/WM/CSF segmentations + extras will be output along with maps
 % ---------------------------------------------------------------------
 mUSoutP          = cfg_entry;
-mUSoutP.tag      = 'raw_sens_T1';
+mUSoutP.tag      = 'mUSoutP';
 mUSoutP.name     = 'US maps + deformation output';
 mUSoutP.help     = {['GM/WM/CSF segmentations + inverse deformation field' ...
                       ' and GM/WM segementations warped to MNI will be output to Results/Supplementary.']};

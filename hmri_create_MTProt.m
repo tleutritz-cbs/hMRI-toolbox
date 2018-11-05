@@ -1024,22 +1024,21 @@ else
     PMTw = '';
 end
 
-if isfield(mpm_params.proc.masks,'mUSout')
-    % finvDef / fwc
+if isfield(mpm_params.proc.masks,'mUSout') || isfield(mpm_params.proc.masks,'mUSoutP')
     PMTw_c1 = fullfile(supplpath, spm_file(fTPM(1,:),'filename'));
     copyfile(fTPM(1,:),PMTw_c1);
     PMTw_c2 = fullfile(supplpath, spm_file(fTPM(2,:),'filename'));
     copyfile(fTPM(2,:),PMTw_c2);
     PMTw_c3 = fullfile(supplpath, spm_file(fTPM(3,:),'filename'));
     copyfile(fTPM(3,:),PMTw_c3);
-    if isfield(mpm_params.proc.masks,'mUSoutP')
-        PMTw_wc1 = fullfile(supplpath, spm_file(fwc(1,:),'filename'));
-        copyfile(fTPM(1,:),PMTw_wc1);
-        PMTw_wc2 = fullfile(supplpath, spm_file(fwc(2,:),'filename'));
-        copyfile(fTPM(2,:),PMTw_wc2);
-        PMTw_invDef = fullfile(supplpath, spm_file(finvDef(3,:),'filename'));
-        copyfile(fTPM(3,:),PMTw_invDef);
-    end
+end
+if isfield(mpm_params.proc.masks,'mUSoutP')
+    PMTw_wc1 = fullfile(supplpath, spm_file(fwc(1,:),'filename'));
+    copyfile(fwc(1,:),PMTw_wc1);
+    PMTw_wc2 = fullfile(supplpath, spm_file(fwc(2,:),'filename'));
+    copyfile(fwc(2,:),PMTw_wc2);
+    PMTw_invDef = fullfile(supplpath, spm_file(finvDef,'filename'));
+    copyfile(finvDef,PMTw_invDef);
 end
 
 % save processing params (mpm_params)
