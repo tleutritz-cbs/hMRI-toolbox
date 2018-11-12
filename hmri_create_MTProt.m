@@ -1346,9 +1346,9 @@ if ~mpm_params.fullOLS
         end
     end
 end
-
 % maximum TE for averaging (ms)
-maxTEval4avg = 30; 
+mpm_params.maxTEval4avg = hmri_get_defaults('maxTEval4avg');
+maxTEval4avg = mpm_params.maxTEval4avg; 
 % find maximum number of echoes that are common to all available contrasts
 ncommonTEvals = 1000;
 for ccon = 1:mpm_params.ncon

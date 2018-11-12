@@ -128,6 +128,12 @@ hmri_def.segment.warp.write = [0 0];
 %==========================================================================
 
 %--------------------------------------------------------------------------
+% Maximum TE for averaging of contrasts (ms) to avoid R2* bias
+%--------------------------------------------------------------------------
+% Value adaption e.g. for ex vivo measurements. ADVANCED USER ONLY. 
+hmri_def.maxTEval4avg = 30;
+
+%--------------------------------------------------------------------------
 % Coregistration of all input images to the average (or TE=0 fit) PDw image
 %--------------------------------------------------------------------------
 % The coregistration step can be disabled using the following flag (not
