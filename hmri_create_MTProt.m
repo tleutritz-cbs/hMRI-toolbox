@@ -1092,27 +1092,23 @@ spm_write_vol(V_maskedA,maskedA);
 
 % Bias-field correction of masked A map
 % use unified segmentation with uniform defaults across the toolbox:
-if isfield(mpm_params.proc.RFsenscorr,'RF_us')
-    job_bfcorr = hmri_get_defaults('segment');
-    job_bfcorr.channel.vols = {V_maskedA.fname};
-    job_bfcorr.channel.biasreg = PDproc.biasreg;
-    job_bfcorr.channel.biasfwhm = PDproc.biasfwhm;
-    job_bfcorr.channel.write = [1 0]; % need the BiasField, obviously!
-    for ctis=1:length(job_bfcorr.tissue)
-        job_bfcorr.tissue(ctis).native = [0 0]; % no need to write c* volumes
-    end
-    output_list = spm_preproc_run(job_bfcorr);
-    
-    % Bias field correction of A map.
-    % Bias field calculation is based on the masked A map, while correction
-    % must be applied to the unmasked A map. The BiasField is therefore
-    % retrieved from previous step and applied onto the original A map.
-    BFfnam = output_list.channel.biasfield{1};
-    BF = double(spm_read_vols(spm_vol(BFfnam)));
-    Y = BF.*spm_read_vols(spm_vol(fA));
-else
-    Y = spm_read_vols(spm_vol(fA));
+job_bfcorr = hmri_get_defaults('segment');
+job_bfcorr.channel.vols = {V_maskedA.fname};
+job_bfcorr.channel.biasreg = PDproc.biasreg;
+job_bfcorr.channel.biasfwhm = PDproc.biasfwhm;
+job_bfcorr.channel.write = [1 0]; % need the BiasField, obviously!
+for ctis=1:length(job_bfcorr.tissue)
+    job_bfcorr.tissue(ctis).native = [0 0]; % no need to write c* volumes
 end
+output_list = spm_preproc_run(job_bfcorr);
+
+% Bias field correction of A map.
+% Bias field calculation is based on the masked A map, while correction
+% must be applied to the unmasked A map. The BiasField is therefore
+% retrieved from previous step and applied onto the original A map.
+BFfnam = output_list.channel.biasfield{1};
+BF = double(spm_read_vols(spm_vol(BFfnam)));
+Y = BF.*spm_read_vols(spm_vol(fA));
 
 % Calibration of flattened A map to % water content using typical white
 % matter value from the litterature (69%)
@@ -1356,12 +1352,15 @@ if mpm_params.PDwidx && mpm_params.T1widx && ISC
         prot_tag = 'Unknown';
         hmri_log(sprintf(['WARNING: MPM protocol unknown. ' ...
             '\n\tCorrection for imperfect spoiling will not be applied.']),mpm_params.defflags);
+        hmri_get_defaults('imperfectSpoilCorr.enabled',false);
+        ISC = false;
     end
 else
     prot_tag = 'Unknown';
 end
 % now retrieve imperfect spoiling correction coefficients
 mpm_params.proc.ISC = hmri_get_defaults(['imperfectSpoilCorr.',prot_tag]);
+mpm_params.proc.ISC.enabled = ISC;
 
 % RF sensitivity bias correction
 mpm_params.proc.RFsenscorr = jobsubj.sensitivity;
